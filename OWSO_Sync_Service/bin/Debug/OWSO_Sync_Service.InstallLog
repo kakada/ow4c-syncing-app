@@ -1,0 +1,53 @@
+﻿Installing assembly 'C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.InstallLog
+   assemblypath = C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.exe
+Installing service OWSO Sync Service...
+Creating EventLog source OWSO Sync Service in log Application...
+Rolling back assembly 'C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.InstallLog
+   assemblypath = C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.exe
+Restoring event log to previous state for source OWSO Sync Service.
+An exception occurred during the Rollback phase of the System.Diagnostics.EventLogInstaller installer.
+System.Security.SecurityException: The source was not found, but some or all event logs could not be searched.  Inaccessible logs: Security, State.
+An exception occurred during the Rollback phase of the installation. This exception will be ignored and the rollback will continue. However, the machine might not fully revert to its initial state after the rollback is complete.
+Installing assembly 'C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.InstallLog
+   assemblypath = C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.exe
+Installing service OWSO Sync Service...
+Creating EventLog source OWSO Sync Service in log Application...
+Rolling back assembly 'C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.InstallLog
+   assemblypath = C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.exe
+Restoring event log to previous state for source OWSO Sync Service.
+An exception occurred during the Rollback phase of the System.Diagnostics.EventLogInstaller installer.
+System.Security.SecurityException: The source was not found, but some or all event logs could not be searched.  Inaccessible logs: Security, State.
+An exception occurred during the Rollback phase of the installation. This exception will be ignored and the rollback will continue. However, the machine might not fully revert to its initial state after the rollback is complete.
+Installing assembly 'C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.InstallLog
+   assemblypath = C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.exe
+Installing service OWSO Sync Service...
+Service OWSO Sync Service has been successfully installed.
+Creating EventLog source OWSO Sync Service in log Application...
+Committing assembly 'C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.InstallLog
+   assemblypath = C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.exe
+Uninstalling assembly 'C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.exe'.
+Affected parameters are:
+   logtoconsole = 
+   logfile = C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.InstallLog
+   assemblypath = C:\Users\chand\source\repos\OWSO_Sync_Service\bin\Debug\OWSO_Sync_Service.exe
+Removing EventLog source OWSO Sync Service.
+Service OWSO Sync Service is being removed from the system...
+Service OWSO Sync Service was successfully removed from the system.
