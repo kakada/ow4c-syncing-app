@@ -1,10 +1,5 @@
 ﻿using Sentry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.ServiceProcess;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OWSO_Sync_Service
 {
@@ -15,13 +10,14 @@ namespace OWSO_Sync_Service
         /// </summary>
         static void Main()
         {
-            using (SentrySdk.Init("https://c1ec46e28c844aca90752d754fc7a975@o408810.ingest.sentry.io/5280159"))
+            Setting setting = new Setting();
+            using (SentrySdk.Init(setting.sentryDSN))
             {
                 // App code
                 ServiceBase[] ServicesToRun;
                 ServicesToRun = new ServiceBase[]
                 {
-                new OWSOService()
+                new OWSOService(setting)
                 };
                 ServiceBase.Run(ServicesToRun);
             }

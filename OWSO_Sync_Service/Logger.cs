@@ -1,10 +1,6 @@
 ﻿using Sentry;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OWSO_Sync_Service
 {
@@ -12,27 +8,13 @@ namespace OWSO_Sync_Service
     {
         private static Logger logger;
 
-        private String _baseUrl;
-        private String _databaseSyncAPI;
-        private String _healthStatusAPI;
-
-        private String _areaCode;
-        private int _syncInterval; // in minutes
-
-        private String _databaseUrl;
-        private String _query;
+        private readonly Setting _setting;
 
         private readonly EventLog _log;
 
-        private Logger(String baseUrl, String databaseSyncAPI, String healthStatusAPI, String areaCode, int syncInterval, String databaseUrl, String query)
+        private Logger(Setting setting)
         {
-            _baseUrl = baseUrl;
-            _databaseSyncAPI = databaseSyncAPI;
-            _healthStatusAPI = healthStatusAPI;
-            _areaCode = areaCode;
-            _syncInterval = syncInterval;
-            _databaseUrl = databaseUrl;
-            _query = query;
+            _setting = setting;
 
             _log = new EventLog();
             if (!EventLog.SourceExists("OWSO"))
@@ -45,9 +27,9 @@ namespace OWSO_Sync_Service
         /**
          * This method use for the first time instantiate the object to store the basic properties for Logger
          */
-        public static Logger Initialize(String baseUrl, String databaseSyncAPI, String healthStatusAPI, String areaCode, int syncInterval, String databaseUrl, String query)
+        public static Logger Initialize(Setting config)
         {
-            logger = new Logger(baseUrl, databaseSyncAPI, healthStatusAPI, areaCode, syncInterval, databaseUrl, query);
+            logger = new Logger(config);
             return logger;
         }
         public static Logger getInstance()
@@ -55,7 +37,7 @@ namespace OWSO_Sync_Service
             return logger;
         }
 
-        public void log(Object obj, String message) 
+        public void log(Object obj, String message)
         {
             String errorMessage = formatMessage(obj, message, "INFORMATION");
             _log.WriteEntry(errorMessage);
@@ -75,8 +57,30 @@ namespace OWSO_Sync_Service
 
         private String formatMessage(Object obj, String message, String type)
         {
-            return String.Format("AREA ID: {0}\nBaseUrl: {1}\nDatabaseSyncAPI: {2}\nHealthCheckAPI: {3}\nInterval: {4}\nDatabaseUrl: {5}\nQuery: {6}\ntype: {7}\nClass: {8}\nMessage: {9}",
-                _areaCode, _baseUrl, _databaseSyncAPI, _healthStatusAPI, _syncInterval, _databaseUrl, _query, type, obj.GetType().Name, message);
+            return String.Format("AREA ID: {0}" +
+                "\nBaseUrl: {1}" +
+                "\nDatabaseSyncAPI: {2}" +
+                "\nHealthCheckAPI: {3}" +
+                "\nInterval: {4}" +
+                "\nDatabaseUrl: {5}" +
+                "\nQuery: {6}" +
+                "\nWeb Token: {7}" +
+                "\nSentry DSN: {8}" +
+                "\ntype: {9}" +
+                "\nClass: {10}" +
+                "\nMessage: {11}",
+                _setting.areaCode,
+                _setting.baseUrl,
+                _setting.databaseSyncAPI,
+                _setting.healthStatusAPI,
+                _setting.syncInterval,
+                _setting.databaseUrl,
+                _setting.query,
+                _setting.webToken,
+                _setting.sentryDSN,
+                type,
+                obj.GetType().Name,
+                message);
         }
     }
 }

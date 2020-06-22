@@ -1,44 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Linq;
-using System.ServiceProcess;
-using System.Text;
-using System.Threading.Tasks;
-using System.Timers;
 using System.Runtime.InteropServices;
-using System.Configuration;
-using System.Collections.Specialized;
-using System.IO;
-using Sentry;
+using System.ServiceProcess;
+using System.Timers;
 
 namespace OWSO_Sync_Service
 {
     public partial class OWSOService : ServiceBase
     {
-        private const String KEY_BASE_URL = "base_url";
-        private const String KEY_DATABASE_SYNC_API = "database_sync_api";
-        private const String KEY_HEALTH_STATUS_UPDATE_API = "health_status_update_api";
-
-        private const String KEY_AREA_CODE = "area_code";
-        private const String KEY_DURATION = "interval";
-
-        private const String KEY_DB_URL = "database_url";
-        private const String KEY_QUERY = "query";
-
-        // Configuration Properties
-        private String _baseUrl;
-        private String _databaseSyncAPI;
-        private String _healthStatusAPI;
-
-        private String _areaCode;
-        private int _syncInterval; // in minutes
-
-        private String _databaseUrl;
-        private String _query;
-
         private readonly APICommand apiCommand;
         private readonly Database _database;
 
@@ -50,34 +18,20 @@ namespace OWSO_Sync_Service
         [DllImport("advapi32.dll", SetLastError = true)]
         private static extern bool SetServiceStatus(System.IntPtr handle, ref ServiceStatus serviceStatus);
 
-        public OWSOService()
+        public OWSOService(Setting setting)
         {
             InitializeComponent();
-            readConfiguration();
-            _logger = Logger.Initialize(_baseUrl, _databaseSyncAPI, _healthStatusAPI, _areaCode, _syncInterval, _databaseUrl, _query);
+            _logger = Logger.Initialize(setting);
 
-            _database = new Database(_databaseUrl, _query);
+            _database = new Database(setting);
             // apiCommand = new APICommand(_baseUrl, _databaseSyncAPI, _healthStatusAPI);
             lastupdateStorage = new LastSyncUpdateStorage();
 
-            timer = new Timer(_syncInterval * 60000) { AutoReset = true };
+            timer = new Timer(setting.syncInterval * 60000) { AutoReset = true };
             timer.Elapsed += OnTimer;
         }
 
-        private void readConfiguration()
-        {
-            NameValueCollection settings = ConfigurationManager.AppSettings;
-            _baseUrl = settings.Get(KEY_BASE_URL);
-            _databaseSyncAPI = settings.Get(KEY_DATABASE_SYNC_API);
-            _healthStatusAPI = settings.Get(KEY_HEALTH_STATUS_UPDATE_API);
 
-            _areaCode = settings.Get(KEY_AREA_CODE);
-            String durationText = settings.Get(KEY_DURATION);
-            _syncInterval = Int32.Parse(durationText);
-
-            _databaseUrl = settings.Get(KEY_DB_URL);
-            _query = settings.Get(KEY_QUERY);
-        }
 
         protected override void OnStart(string[] args)
         {
