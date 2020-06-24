@@ -24,13 +24,12 @@ namespace OWSO_Sync_Service
             _logger = Logger.Initialize(setting);
 
             _database = new Database(setting);
-            // apiCommand = new APICommand(_baseUrl, _databaseSyncAPI, _healthStatusAPI);
+            apiCommand = new APICommand(setting);
             lastupdateStorage = new LastSyncUpdateStorage();
 
             timer = new Timer(setting.syncInterval * 60000) { AutoReset = true };
             timer.Elapsed += OnTimer;
         }
-
 
 
         protected override void OnStart(string[] args)
@@ -40,7 +39,6 @@ namespace OWSO_Sync_Service
             serviceStatus.dwCurrentState = ServiceState.SERVICE_START_PENDING;
             serviceStatus.dwWaitHint = 100000;
             SetServiceStatus(this.ServiceHandle, ref serviceStatus);
-            _logger.log(this, "Start service");
 
             // Set up a timer that triggers every minute.
             timer.Start();
@@ -52,14 +50,11 @@ namespace OWSO_Sync_Service
 
         public void OnTimer(object sender, ElapsedEventArgs args)
         {
-            int currentTime = DateTime.Now.Millisecond;
-            _logger.log(this, "Timer is triggered");
-            long lastupdated = lastupdateStorage.getLastUpdateSync();
+            DateTime currentTime = DateTime.Now;
+            DateTime lastupdated = lastupdateStorage.getLastUpdateSync();
             String json = _database.readUpdatedDataInJson(lastupdated);
-            _logger.log(this, "JSON String: " + json);
 
-            _logger.log(this, "Store current time: " + currentTime);
-            lastupdateStorage.storeLastUpdateSync(currentTime);
+            apiCommand.SubmitData(json, currentTime);
         }
 
         protected override void OnStop()

@@ -1,26 +1,28 @@
 ﻿using System;
+using System.Globalization;
 using System.IO;
 
 namespace OWSO_Sync_Service
 {
     class LastSyncUpdateStorage
     {
-        private const String FILENAME = "sync_date.data";
+        private const String FILENAME = "date.cfg";
+        private const String DATETIME_FORMAT = "yyyyMMddHHmmssFFF";
         private readonly String _filePath;
 
         public LastSyncUpdateStorage()
         {
-            _filePath = String.Format(@"{0}\{1}", Environment.CurrentDirectory, FILENAME);
+            _filePath = FILENAME;
         }
 
-        public void storeLastUpdateSync(int time)
+        public void storeLastUpdateSync(DateTime date)
         {
             BinaryWriter bw;
 
             try
             {
                 FileStream f = new FileStream(_filePath, FileMode.OpenOrCreate, FileAccess.Write, FileShare.ReadWrite);
-                Logger.getInstance().log(this, "Write File Path: " + _filePath);
+                Logger.getInstance().log(this, "Write File Path: " + f.Name);
                 bw = new BinaryWriter(f);
             }
             catch (IOException e)
@@ -32,7 +34,7 @@ namespace OWSO_Sync_Service
             //writing into the file
             try
             {
-                bw.Write((Int32)time);
+                bw.Write(date.ToString(DATETIME_FORMAT));
             }
             catch (IOException e)
             {
@@ -42,17 +44,21 @@ namespace OWSO_Sync_Service
             bw.Close();
         }
 
-        public long getLastUpdateSync()
+        public DateTime getLastUpdateSync()
         {
-            long time = 0;
+            DateTime time = new DateTime(0);
             BinaryReader br = null;
             try
             {
                 FileStream f = new FileStream(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                Logger.getInstance().log(this, "Read File Path: " + _filePath);
+                Logger.getInstance().log(this, "Read File Path: " + f.Name);
                 br = new BinaryReader(f);
-                br.BaseStream.Seek(0, SeekOrigin.Begin);
-                time = br.ReadInt32();
+                String dateTimeString = br.ReadString();
+                Logger.getInstance().log(this, "DateTimeString : " + dateTimeString);
+                if(!(dateTimeString == null || dateTimeString.Equals("")))
+                {
+                    time = DateTime.ParseExact(dateTimeString, DATETIME_FORMAT, CultureInfo.InvariantCulture);
+                }
             }
             catch (IOException e)
             {
@@ -63,7 +69,6 @@ namespace OWSO_Sync_Service
             {
                 br.Close();
             }
-
 
             return time;
         }

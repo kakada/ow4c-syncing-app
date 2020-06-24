@@ -16,7 +16,7 @@ namespace OWSO_Sync_Service
             this.setting = setting;
         }
 
-        public String readUpdatedDataInJson(long lastUpdatedTime)
+        public String readUpdatedDataInJson(DateTime lastUpdatedTime)
         {
             var json = new StringBuilder();
 
@@ -27,20 +27,10 @@ namespace OWSO_Sync_Service
                     conn.ConnectionString = setting.databaseUrl;
                     conn.Open();
 
-                    Logger.getInstance().log(this, "Last updated date and time: " + lastUpdatedTime);
-                    String query = setting.query + RETURN_JSON_QUERY;
-                    if (lastUpdatedTime > 0)
-                    {
-                        DateTime dateTime = new DateTime(lastUpdatedTime);
-                        query = String.Format(query, dateTime.ToString("yyyy-MM-dd HH:mm:ss"));
-                    }
-                    else
-                    {
-                        query = String.Format(query, 0);
-                    }
+                    String query = String.Format(setting.query, "'" + lastUpdatedTime.ToString(setting.compareDateTimeFormat) + "'");
 
                     Logger.getInstance().log(this, "Query: " + query);
-                    SqlCommand command = new SqlCommand(query, conn);
+                    SqlCommand command = new SqlCommand(query + RETURN_JSON_QUERY, conn);
                     using (SqlDataReader reader = command.ExecuteReader())
                     {
                         if (reader.HasRows)
@@ -52,7 +42,7 @@ namespace OWSO_Sync_Service
                         }
                         else
                         {
-                            json.Append("[]");
+                            json.Append("");
                         }
                     }
 

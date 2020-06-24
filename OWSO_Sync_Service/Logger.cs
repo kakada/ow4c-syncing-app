@@ -69,14 +69,14 @@ namespace OWSO_Sync_Service
                 "\ntype: {9}" +
                 "\nClass: {10}" +
                 "\nMessage: {11}",
-                _setting.areaCode,
+                _setting.siteCode,
                 _setting.baseUrl,
                 _setting.databaseSyncAPI,
                 _setting.healthStatusAPI,
                 _setting.syncInterval,
                 _setting.databaseUrl,
                 _setting.query,
-                _setting.webToken,
+                _setting.accessToken,
                 _setting.sentryDSN,
                 type,
                 obj.GetType().Name,
