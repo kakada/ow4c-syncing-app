@@ -19,24 +19,28 @@ namespace OWSO_Sync_Service
         {
             _setting = setting;
             lastupdateStorage = new LastSyncUpdateStorage();
+            initialHttpClient();
+        }
+
+        private void initialHttpClient()
+        {
+            client.BaseAddress = new Uri(_setting.baseUrl);
+            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _setting.accessToken);
+            client.Timeout = TimeSpan.FromSeconds(15);
         }
 
         public void SubmitData(String content, DateTime newTime)
         {
+            Logger.getInstance().log(this, "submit data");
             RunAsync(content, newTime).GetAwaiter().GetResult();
         }
 
         async Task RunAsync(String content, DateTime newTime)
-        {
-            HttpStatusCode statusCode;
-            client.BaseAddress = new Uri(_setting.baseUrl);
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _setting.accessToken);
-
+        {          
             try
             {
-                statusCode = await SendAPI(String.Format(_setting.healthStatusAPI, _setting.siteCode), "");
+                HttpStatusCode statusCode = await SendAPI(String.Format(_setting.healthStatusAPI, _setting.siteCode), "");
                 Logger.getInstance().log(this, "Health Status: " + statusCode);
 
                 if (statusCode == HttpStatusCode.OK)
@@ -72,7 +76,7 @@ namespace OWSO_Sync_Service
 
         async Task<HttpStatusCode> SendAPI(String api, String content)
         {
-            HttpResponseMessage response = await client.PutAsync(api, new StringContent(content, Encoding.UTF8, "application/json"));
+            HttpResponseMessage response = await client.PutAsync(_setting.baseUrl + api, new StringContent(content, Encoding.UTF8, "application/json"));
             string result = response.Content.ReadAsStringAsync().Result;
             Logger.getInstance().log(this, "request: " + api + "\nresponse: " + result);
             return response.StatusCode;
