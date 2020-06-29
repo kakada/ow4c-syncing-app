@@ -27,7 +27,7 @@ namespace OWSO_Sync_Service
             client.BaseAddress = new Uri(_setting.baseUrl);
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _setting.accessToken);
-            client.Timeout = TimeSpan.FromSeconds(15);
+            client.Timeout = TimeSpan.FromSeconds(_setting.connectionTimeout);
         }
 
         public void SubmitData(String content, DateTime newTime)
