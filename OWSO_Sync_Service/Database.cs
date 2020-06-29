@@ -37,7 +37,7 @@ namespace OWSO_Sync_Service
                         {
                             while (reader.Read())
                             {
-                                json.Append(reader.GetValue(0).ToString());
+                                json.Append(String.Format("{{\"tickets\":{0}}}" ,reader.GetValue(0).ToString()));
                             }
                         }
                         else
