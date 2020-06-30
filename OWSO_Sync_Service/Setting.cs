@@ -9,6 +9,7 @@ namespace OWSO_Sync_Service
         private const String KEY_BASE_URL = "base_url";
         private const String KEY_DATABASE_SYNC_API = "database_sync_api";
         private const String KEY_HEALTH_STATUS_UPDATE_API = "health_status_update_api";
+        private const String KEY_CONNECTION_TIME_OUT = "connection_time_out";
 
         private const String KEY_SITE_CODE = "site_code";
         private const String KEY_DURATION = "interval";
@@ -24,6 +25,7 @@ namespace OWSO_Sync_Service
         public String baseUrl { get; }
         public String databaseSyncAPI { get; }
         public String healthStatusAPI { get; }
+        public int connectionTimeout { get;  } // in seconds
 
         public String siteCode { get; }
         public int syncInterval { get; } // in minutes
@@ -42,6 +44,7 @@ namespace OWSO_Sync_Service
             baseUrl = settings.Get(KEY_BASE_URL);
             databaseSyncAPI = settings.Get(KEY_DATABASE_SYNC_API);
             healthStatusAPI = settings.Get(KEY_HEALTH_STATUS_UPDATE_API);
+            connectionTimeout = Int32.Parse(settings.Get(KEY_CONNECTION_TIME_OUT));
 
             siteCode = settings.Get(KEY_SITE_CODE);
             String durationText = settings.Get(KEY_DURATION);
