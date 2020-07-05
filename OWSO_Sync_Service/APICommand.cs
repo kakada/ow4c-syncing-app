@@ -1,16 +1,12 @@
-﻿using Sentry;
-using System;
+﻿using System;
+using System.IO;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace OWSO_Sync_Service
 {
     class APICommand
     {
-        private HttpClient client = new HttpClient();
 
         private readonly Setting _setting;
         private readonly LastSyncUpdateStorage lastupdateStorage;
@@ -19,36 +15,25 @@ namespace OWSO_Sync_Service
         {
             _setting = setting;
             lastupdateStorage = new LastSyncUpdateStorage();
-            initialHttpClient();
-        }
-
-        private void initialHttpClient()
-        {
-            client.BaseAddress = new Uri(_setting.baseUrl);
-            client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _setting.accessToken);
-            client.Timeout = TimeSpan.FromSeconds(_setting.connectionTimeout);
         }
 
         public void SubmitData(String content, DateTime newTime)
         {
-            Logger.getInstance().log(this, "submit data");
-            RunAsync(content, newTime).GetAwaiter().GetResult();
-        }
-
-        async Task RunAsync(String content, DateTime newTime)
-        {          
+            Logger.getInstance().log(this, "submit data: " + content);
             try
             {
-                HttpStatusCode statusCode = await SendAPI(String.Format(_setting.healthStatusAPI, _setting.siteCode), "");
+                String healthApi = String.Format(_setting.healthStatusAPI, _setting.siteCode);
+                Logger.getInstance().log(this, "Sending health status api: " + healthApi);
+                var statusCode = SendAPI(healthApi, "");
                 Logger.getInstance().log(this, "Health Status: " + statusCode);
 
                 if (statusCode == HttpStatusCode.OK)
                 {
-                    if(!content.Equals(""))
+                    if (!content.Equals(""))
                     {
-                        Logger.getInstance().log(this, "Database sync content: " + content);
-                        statusCode = await SendAPI(String.Format(_setting.databaseSyncAPI, _setting.siteCode), content);
+                        String dbSyncApi = String.Format(_setting.databaseSyncAPI, _setting.siteCode);
+                        Logger.getInstance().log(this, "Sending database sync api: " + dbSyncApi);
+                        statusCode = SendAPI(dbSyncApi, content);
 
                         if (statusCode == HttpStatusCode.OK)
                         {
@@ -60,26 +45,74 @@ namespace OWSO_Sync_Service
                         {
                             Logger.getInstance().logError(this, "Database sync error: " + statusCode.ToString());
                         }
-                    } else
+                    }
+                    else
                     {
                         Logger.getInstance().log(this, "Store current time: " + newTime.ToString());
                         lastupdateStorage.storeLastUpdateSync(newTime);
                     }
                 }
             }
-
             catch (Exception e)
             {
-                SentrySdk.CaptureException(e);
+                Logger.getInstance().logError(this, e);
             }
         }
 
-        async Task<HttpStatusCode> SendAPI(String api, String content)
+        private HttpStatusCode SendAPI(String api, String content)
         {
-            HttpResponseMessage response = await client.PutAsync(_setting.baseUrl + api, new StringContent(content, Encoding.UTF8, "application/json"));
-            string result = response.Content.ReadAsStringAsync().Result;
-            Logger.getInstance().log(this, "request: " + api + "\nresponse: " + result);
-            return response.StatusCode;
+            supportHttpsRequest();
+            HttpWebRequest request = buildHttpRequest(_setting.baseUrl + api, content);
+
+            // Get the response.
+            WebResponse response = request.GetResponse();
+
+            HttpStatusCode statusCode = ((HttpWebResponse)response).StatusCode;
+            // Display the status.
+            Logger.getInstance().log(this, "Http Response Status Code : " + statusCode);
+
+            // Get the stream containing content returned by the server.
+            // The using block ensures the stream is automatically closed.
+            using (Stream dataStream = response.GetResponseStream())
+            {
+                // Open the stream using a StreamReader for easy access.
+                StreamReader reader = new StreamReader(dataStream);
+                // Read the content.
+                string responseFromServer = reader.ReadToEnd();
+                // Display the content.
+                Logger.getInstance().log(this, "Http Response content : " + responseFromServer);
+            }
+
+            // Close the response.
+            response.Close();
+
+            return statusCode;
         }
-    }
+
+        private void supportHttpsRequest()
+        {
+            ServicePointManager.Expect100Continue = true;
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072; // Tls12
+        }
+
+        private HttpWebRequest buildHttpRequest(String url, String content)
+        {
+            HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+            request.Method = WebRequestMethods.Http.Put;
+            request.PreAuthenticate = true;
+            request.Headers.Add("Authorization", "Bearer " + _setting.accessToken);
+            request.Accept = "application/json";
+
+            // add request content
+            UTF8Encoding encoding = new UTF8Encoding();
+            byte[] httpContent = encoding.GetBytes(content);
+            request.ContentType = "application/x-www-form-urlencoded";
+            request.ContentLength = httpContent.Length;
+            Stream newStream = request.GetRequestStream();
+            newStream.Write(httpContent, 0, httpContent.Length);
+            newStream.Close();
+
+            return request;
+        }
+}
 }

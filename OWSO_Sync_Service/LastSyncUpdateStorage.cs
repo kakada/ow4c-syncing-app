@@ -55,7 +55,7 @@ namespace OWSO_Sync_Service
                 br = new BinaryReader(f);
                 String dateTimeString = br.ReadString();
                 Logger.getInstance().log(this, "DateTimeString : " + dateTimeString);
-                if(!(dateTimeString == null || dateTimeString.Equals("")))
+                if (!(dateTimeString == null || dateTimeString.Equals("")))
                 {
                     time = DateTime.ParseExact(dateTimeString, DATETIME_FORMAT, CultureInfo.InvariantCulture);
                 }

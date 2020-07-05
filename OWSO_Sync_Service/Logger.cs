@@ -1,4 +1,5 @@
-﻿using Sentry;
+﻿//using SharpRaven;
+//using SharpRaven.Data;
 using System;
 using System.Diagnostics;
 
@@ -6,6 +7,7 @@ namespace OWSO_Sync_Service
 {
     class Logger
     {
+        //private RavenClient ravenClient;
         private static Logger logger;
 
         private readonly Setting _setting;
@@ -15,6 +17,7 @@ namespace OWSO_Sync_Service
         private Logger(Setting setting)
         {
             _setting = setting;
+            // ravenClient = new RavenClient(_setting.sentryDSN);
 
             _log = new EventLog();
             if (!EventLog.SourceExists("OWSO"))
@@ -45,14 +48,14 @@ namespace OWSO_Sync_Service
 
         public void logError(Object obj, Exception e)
         {
-            logError(obj, e.Message);
+            logError(obj, e.StackTrace);
         }
 
         public void logError(Object obj, String message)
         {
             String errorMessage = formatMessage(obj, message, "ERROR");
             _log.WriteEntry(errorMessage);
-            SentrySdk.CaptureMessage(errorMessage);
+            //ravenClient.Capture(new SentryEvent(new SentryMessage(errorMessage)));
         }
 
         private String formatMessage(Object obj, String message, String type)

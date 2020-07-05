@@ -1,5 +1,4 @@
-﻿using Sentry;
-using System;
+﻿using System;
 using System.Data.SqlClient;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -37,7 +36,7 @@ namespace OWSO_Sync_Service
                         {
                             while (reader.Read())
                             {
-                                json.Append(String.Format("{{\"tickets\":{0}}}" ,reader.GetValue(0).ToString()));
+                                json.Append(String.Format("{{\"tickets\":{0}}}", reader.GetValue(0).ToString()));
                             }
                         }
                         else
@@ -52,7 +51,7 @@ namespace OWSO_Sync_Service
             }
             catch (Exception e)
             {
-                SentrySdk.CaptureException(e);
+                Logger.getInstance().logError(this, e);
             }
 
 

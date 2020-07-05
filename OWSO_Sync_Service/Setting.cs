@@ -25,7 +25,7 @@ namespace OWSO_Sync_Service
         public String baseUrl { get; }
         public String databaseSyncAPI { get; }
         public String healthStatusAPI { get; }
-        public int connectionTimeout { get;  } // in seconds
+        public int connectionTimeout { get; } // in seconds
 
         public String siteCode { get; }
         public int syncInterval { get; } // in minutes
