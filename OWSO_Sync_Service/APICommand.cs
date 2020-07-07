@@ -17,7 +17,7 @@ namespace OWSO_Sync_Service
             lastupdateStorage = new LastSyncUpdateStorage();
         }
 
-        public void SubmitData(String content, DateTime newTime)
+        public void SubmitData(String content, int newTimestamp)
         {
             Logger.getInstance().log(this, "submit data: " + content);
             try
@@ -37,8 +37,8 @@ namespace OWSO_Sync_Service
 
                         if (statusCode == HttpStatusCode.OK)
                         {
-                            Logger.getInstance().log(this, "Store current time: " + newTime.ToString());
-                            lastupdateStorage.storeLastUpdateSync(newTime);
+                            Logger.getInstance().log(this, "Store current time: " + newTimestamp);
+                            lastupdateStorage.storeLastUpdateSync(newTimestamp);
                             Logger.getInstance().log(this, "Database sync success");
                         }
                         else
@@ -48,8 +48,8 @@ namespace OWSO_Sync_Service
                     }
                     else
                     {
-                        Logger.getInstance().log(this, "Store current time: " + newTime.ToString());
-                        lastupdateStorage.storeLastUpdateSync(newTime);
+                        Logger.getInstance().log(this, "Store current time: " + newTimestamp);
+                        lastupdateStorage.storeLastUpdateSync(newTimestamp);
                     }
                 }
             }

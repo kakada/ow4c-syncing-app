@@ -15,7 +15,43 @@ namespace OWSO_Sync_Service
             this.setting = setting;
         }
 
-        public String readUpdatedDataInJson(DateTime lastUpdatedTime)
+        public int readMaxTimestamp()
+        {
+            int lastMaxTimestamp = 0;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection())
+                {
+                    conn.ConnectionString = setting.databaseUrl;
+                    conn.Open();
+
+                    String query = setting.queryMaxTimestamp;
+
+                    Logger.getInstance().log(this, "Query max timestamp: " + query);
+                    SqlCommand command = new SqlCommand(query, conn);
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            reader.Read();
+                            lastMaxTimestamp = reader.GetInt32(0);
+                        }
+                    }
+
+                    conn.Close();
+                    conn.Dispose();
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.getInstance().logError(this, e);
+            }
+
+
+            return lastMaxTimestamp;
+        }
+
+        public String readUpdatedDataInJson(int lastTimestamp)
         {
             var json = new StringBuilder();
 
@@ -26,7 +62,7 @@ namespace OWSO_Sync_Service
                     conn.ConnectionString = setting.databaseUrl;
                     conn.Open();
 
-                    String query = String.Format(setting.query, "'" + lastUpdatedTime.ToString(setting.compareDateTimeFormat) + "'");
+                    String query = String.Format(setting.query, lastTimestamp);
 
                     Logger.getInstance().log(this, "Query: " + query);
                     SqlCommand command = new SqlCommand(query + RETURN_JSON_QUERY, conn);

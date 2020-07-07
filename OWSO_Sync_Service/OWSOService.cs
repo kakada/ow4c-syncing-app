@@ -50,11 +50,11 @@ namespace OWSO_Sync_Service
 
         public void OnTimer(object sender, ElapsedEventArgs args)
         {
-            DateTime currentTime = DateTime.Now;
-            DateTime lastupdated = lastupdateStorage.getLastUpdateSync();
+            int newTimestamp = _database.readMaxTimestamp();
+            int lastupdated = lastupdateStorage.getLastUpdateSync();
             String json = _database.readUpdatedDataInJson(lastupdated);
 
-            apiCommand.SubmitData(json, currentTime);
+            apiCommand.SubmitData(json, newTimestamp);
         }
 
         protected override void OnStop()

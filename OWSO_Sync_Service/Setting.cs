@@ -16,7 +16,8 @@ namespace OWSO_Sync_Service
 
         private const String KEY_DB_URL = "database_url";
         private const String KEY_QUERY = "query";
-        private const String KEY_COMPARE_DATE_TIME_FORMAT = "compare_date_time_format";
+        private const String KEY_QUERY_MAX_TIMESTAMP = "query_max_timestamp";
+        //private const String KEY_COMPARE_DATE_TIME_FORMAT = "compare_date_time_format";
         private const String KEY_ACCESS_TOKEN = "access_token";
 
         private const String KEY_SENTRY_DSN = "sentry_dsn";
@@ -33,7 +34,9 @@ namespace OWSO_Sync_Service
         public String databaseUrl { get; }
         public String query { get; }
 
-        public String compareDateTimeFormat { get; }
+        public String queryMaxTimestamp { get; }
+
+        //public String compareDateTimeFormat { get; }
         public String accessToken { get; }
 
         public String sentryDSN { get; }
@@ -52,7 +55,8 @@ namespace OWSO_Sync_Service
 
             databaseUrl = settings.Get(KEY_DB_URL);
             query = settings.Get(KEY_QUERY);
-            compareDateTimeFormat = settings.Get(KEY_COMPARE_DATE_TIME_FORMAT);
+            queryMaxTimestamp = settings.Get(KEY_QUERY_MAX_TIMESTAMP);
+            //compareDateTimeFormat = settings.Get(KEY_COMPARE_DATE_TIME_FORMAT);
 
             accessToken = settings.Get(KEY_ACCESS_TOKEN);
             sentryDSN = settings.Get(KEY_SENTRY_DSN);
