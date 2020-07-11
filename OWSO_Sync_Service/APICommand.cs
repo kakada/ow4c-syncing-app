@@ -17,17 +17,17 @@ namespace OWSO_Sync_Service
             lastupdateStorage = new LastSyncUpdateStorage();
         }
 
-        public void SubmitData(String content, int newTimestamp)
+        public void SubmitData(STATUS status, String content, int newTimestamp)
         {
             Logger.getInstance().log(this, "submit data: " + content);
             try
             {
-                String healthApi = String.Format(_setting.healthStatusAPI, _setting.siteCode);
+                String healthApi = String.Format(_setting.healthStatusAPI, status == STATUS.SUCCESS ? "success" : "failed", _setting.siteCode);
                 Logger.getInstance().log(this, "Sending health status api: " + healthApi);
                 var statusCode = SendAPI(healthApi, "");
                 Logger.getInstance().log(this, "Health Status: " + statusCode);
 
-                if (statusCode == HttpStatusCode.OK)
+                if (status == STATUS.SUCCESS && statusCode == HttpStatusCode.OK)
                 {
                     if (!content.Equals(""))
                     {

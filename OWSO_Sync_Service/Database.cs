@@ -51,7 +51,7 @@ namespace OWSO_Sync_Service
             return lastMaxTimestamp;
         }
 
-        public String readUpdatedDataInJson(int lastTimestamp)
+        public Tuple<STATUS, String> readUpdatedDataInJson(int lastTimestamp)
         {
             var json = new StringBuilder();
 
@@ -88,10 +88,17 @@ namespace OWSO_Sync_Service
             catch (Exception e)
             {
                 Logger.getInstance().logError(this, e);
+                return new Tuple<STATUS, String>(STATUS.FAILED, e.Message);
             }
 
 
-            return Regex.Replace(json.ToString(), "\"[\\s\\t]+|[\\s\\t]+\"", "\"");
+            return new Tuple<STATUS, String>(STATUS.SUCCESS, Regex.Replace(json.ToString(), "\"[\\s\\t]+|[\\s\\t]+\"", "\""));
         }
     }
+}
+
+public enum STATUS
+{
+    SUCCESS,
+    FAILED
 }

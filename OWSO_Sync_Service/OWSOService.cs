@@ -52,9 +52,9 @@ namespace OWSO_Sync_Service
         {
             int newTimestamp = _database.readMaxTimestamp();
             int lastupdated = lastupdateStorage.getLastUpdateSync();
-            String json = _database.readUpdatedDataInJson(lastupdated);
+            Tuple<STATUS, String> result = _database.readUpdatedDataInJson(lastupdated);
 
-            apiCommand.SubmitData(json, newTimestamp);
+            apiCommand.SubmitData(result.Item1, result.Item2, newTimestamp);
         }
 
         protected override void OnStop()
