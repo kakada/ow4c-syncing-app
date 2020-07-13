@@ -92,7 +92,8 @@ namespace OWSO_Sync_Service
         private void supportHttpsRequest()
         {
             ServicePointManager.Expect100Continue = true;
-            ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072; // Tls12
+            // ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072; // Tls12
+            ServicePointManager.SecurityProtocol = (SecurityProtocolType)768; // Tls11
         }
 
         private HttpWebRequest buildHttpRequest(String url, String content)
