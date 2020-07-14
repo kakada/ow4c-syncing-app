@@ -30,30 +30,33 @@ namespace OWSO_Sync_Service
             client.Timeout = TimeSpan.FromSeconds(_setting.connectionTimeout);
         }
 
-        public void SubmitData(String content, DateTime newTime)
+        public void SubmitData(STATUS status, String content, int newTimestamp)
         {
-            Logger.getInstance().log(this, "submit data");
-            RunAsync(content, newTime).GetAwaiter().GetResult();
+            Logger.getInstance().log(this, "submit data: " + content);
+            RunAsync(status, content, newTimestamp).GetAwaiter().GetResult();
         }
 
-        async Task RunAsync(String content, DateTime newTime)
+        async Task RunAsync(STATUS status, String content, int newTimestamp)
         {          
             try
             {
-                HttpStatusCode statusCode = await SendAPI(String.Format(_setting.healthStatusAPI, _setting.siteCode), "");
+                String healthApi = String.Format(_setting.healthStatusAPI, status == STATUS.SUCCESS ? "success" : "failed", _setting.siteCode);
+                Logger.getInstance().log(this, "Sending health status api: " + healthApi);
+                HttpStatusCode statusCode = await SendAPI(healthApi, "");
                 Logger.getInstance().log(this, "Health Status: " + statusCode);
 
-                if (statusCode == HttpStatusCode.OK)
+                if (status == STATUS.SUCCESS && statusCode == HttpStatusCode.OK)
                 {
                     if(!content.Equals(""))
                     {
-                        Logger.getInstance().log(this, "Database sync content: " + content);
-                        statusCode = await SendAPI(String.Format(_setting.databaseSyncAPI, _setting.siteCode), content);
+                        String dbSyncApi = String.Format(_setting.databaseSyncAPI, _setting.siteCode);
+                        Logger.getInstance().log(this, "Sending database sync api: " + dbSyncApi);
+                        statusCode = await SendAPI(dbSyncApi, content);
 
                         if (statusCode == HttpStatusCode.OK)
                         {
-                            Logger.getInstance().log(this, "Store current time: " + newTime.ToString());
-                            lastupdateStorage.storeLastUpdateSync(newTime);
+                            Logger.getInstance().log(this, "Store current time: " + newTimestamp);
+                            lastupdateStorage.storeLastUpdateSync(newTimestamp);
                             Logger.getInstance().log(this, "Database sync success");
                         }
                         else
@@ -62,15 +65,15 @@ namespace OWSO_Sync_Service
                         }
                     } else
                     {
-                        Logger.getInstance().log(this, "Store current time: " + newTime.ToString());
-                        lastupdateStorage.storeLastUpdateSync(newTime);
+                        Logger.getInstance().log(this, "Store current time: " + newTimestamp);
+                        lastupdateStorage.storeLastUpdateSync(newTimestamp);
                     }
                 }
             }
 
             catch (Exception e)
             {
-                SentrySdk.CaptureException(e);
+                Logger.getInstance().logError(this, e);
             }
         }
 
