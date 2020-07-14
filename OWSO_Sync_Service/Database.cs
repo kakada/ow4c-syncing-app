@@ -1,5 +1,4 @@
-﻿using Sentry;
-using System;
+﻿using System;
 using System.Data.SqlClient;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -16,7 +15,43 @@ namespace OWSO_Sync_Service
             this.setting = setting;
         }
 
-        public String readUpdatedDataInJson(DateTime lastUpdatedTime)
+        public int readMaxTimestamp()
+        {
+            int lastMaxTimestamp = 0;
+            try
+            {
+                using (SqlConnection conn = new SqlConnection())
+                {
+                    conn.ConnectionString = setting.databaseUrl;
+                    conn.Open();
+
+                    String query = setting.queryMaxTimestamp;
+
+                    Logger.getInstance().log(this, "Query max timestamp: " + query);
+                    SqlCommand command = new SqlCommand(query, conn);
+                    using (SqlDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.HasRows)
+                        {
+                            reader.Read();
+                            lastMaxTimestamp = reader.GetInt32(0);
+                        }
+                    }
+
+                    conn.Close();
+                    conn.Dispose();
+                }
+            }
+            catch (Exception e)
+            {
+                Logger.getInstance().logError(this, e);
+            }
+
+
+            return lastMaxTimestamp;
+        }
+
+        public Tuple<STATUS, String> readUpdatedDataInJson(int lastTimestamp)
         {
             var json = new StringBuilder();
 
@@ -27,7 +62,7 @@ namespace OWSO_Sync_Service
                     conn.ConnectionString = setting.databaseUrl;
                     conn.Open();
 
-                    String query = String.Format(setting.query, "'" + lastUpdatedTime.ToString(setting.compareDateTimeFormat) + "'");
+                    String query = String.Format(setting.query, lastTimestamp);
 
                     Logger.getInstance().log(this, "Query: " + query);
                     SqlCommand command = new SqlCommand(query + RETURN_JSON_QUERY, conn);
@@ -37,7 +72,7 @@ namespace OWSO_Sync_Service
                         {
                             while (reader.Read())
                             {
-                                json.Append(String.Format("{{\"tickets\":{0}}}" ,reader.GetValue(0).ToString()));
+                                json.Append(String.Format("{{\"tickets\":{0}}}", reader.GetValue(0).ToString()));
                             }
                         }
                         else
@@ -52,11 +87,18 @@ namespace OWSO_Sync_Service
             }
             catch (Exception e)
             {
-                SentrySdk.CaptureException(e);
+                Logger.getInstance().logError(this, e);
+                return new Tuple<STATUS, String>(STATUS.FAILED, e.Message);
             }
 
 
-            return Regex.Replace(json.ToString(), "\"[\\s\\t]+|[\\s\\t]+\"", "\"");
+            return new Tuple<STATUS, String>(STATUS.SUCCESS, Regex.Replace(json.ToString(), "\"[\\s\\t]+|[\\s\\t]+\"", "\""));
         }
     }
+}
+
+public enum STATUS
+{
+    SUCCESS,
+    FAILED
 }

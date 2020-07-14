@@ -48,3 +48,7 @@ Edit OWSO_Sync_Service.exe.config as administrator role, and configure the follo
 6. Choose "OWSO Sync Service", then choose Attach
 
 For more detail information about how to debug Windows Service, please refer to https://docs.microsoft.com/en-us/dotnet/framework/windows-services/how-to-debug-windows-service-applications
+
+### Last update sync file storage path
+- c:\Windows\System32
+- c:\Windows\SysWOW64

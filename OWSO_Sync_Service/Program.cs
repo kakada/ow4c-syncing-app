@@ -1,5 +1,4 @@
-﻿using Sentry;
-using System.ServiceProcess;
+﻿using System.ServiceProcess;
 
 namespace OWSO_Sync_Service
 {
@@ -11,16 +10,16 @@ namespace OWSO_Sync_Service
         static void Main()
         {
             Setting setting = new Setting();
-            using (SentrySdk.Init(setting.sentryDSN))
+            Logger.Initialize(setting);
+
+            // App code
+            ServiceBase[] ServicesToRun;
+            ServicesToRun = new ServiceBase[]
             {
-                // App code
-                ServiceBase[] ServicesToRun;
-                ServicesToRun = new ServiceBase[]
-                {
                 new OWSOService(setting)
-                };
-                ServiceBase.Run(ServicesToRun);
-            }
+            };
+            ServiceBase.Run(ServicesToRun);
+
         }
     }
 }
