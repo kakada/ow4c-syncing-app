@@ -45,7 +45,7 @@ namespace OWSO_Sync_Service
 
         public void logError(Object obj, Exception e)
         {
-            logError(obj, e.Message);
+            logError(obj, e.Message + "\n" + e.StackTrace);
         }
 
         public void logError(Object obj, String message)

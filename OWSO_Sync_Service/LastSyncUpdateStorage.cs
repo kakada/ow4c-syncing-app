@@ -7,7 +7,6 @@ namespace OWSO_Sync_Service
     class LastSyncUpdateStorage
     {
         private const String FILENAME = "date.cfg";
-        private const String DATETIME_FORMAT = "yyyyMMddHHmmssFFF";
         private readonly String _filePath;
 
         public LastSyncUpdateStorage()
@@ -15,7 +14,7 @@ namespace OWSO_Sync_Service
             _filePath = FILENAME;
         }
 
-        public void storeLastUpdateSync(DateTime date)
+        public void storeLastUpdateSync(int timestamp)
         {
             BinaryWriter bw;
 
@@ -34,7 +33,7 @@ namespace OWSO_Sync_Service
             //writing into the file
             try
             {
-                bw.Write(date.ToString(DATETIME_FORMAT));
+                bw.Write(timestamp);
             }
             catch (IOException e)
             {
@@ -44,21 +43,17 @@ namespace OWSO_Sync_Service
             bw.Close();
         }
 
-        public DateTime getLastUpdateSync()
+        public int getLastUpdateSync()
         {
-            DateTime time = new DateTime(0);
+            int timestamp = 0;
             BinaryReader br = null;
             try
             {
                 FileStream f = new FileStream(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                 Logger.getInstance().log(this, "Read File Path: " + f.Name);
                 br = new BinaryReader(f);
-                String dateTimeString = br.ReadString();
-                Logger.getInstance().log(this, "DateTimeString : " + dateTimeString);
-                if(!(dateTimeString == null || dateTimeString.Equals("")))
-                {
-                    time = DateTime.ParseExact(dateTimeString, DATETIME_FORMAT, CultureInfo.InvariantCulture);
-                }
+                timestamp = br.ReadInt32();
+                Logger.getInstance().log(this, "Read Timestamp : " + timestamp);
             }
             catch (IOException e)
             {
@@ -70,7 +65,7 @@ namespace OWSO_Sync_Service
                 br.Close();
             }
 
-            return time;
+            return timestamp;
         }
     }
 }
