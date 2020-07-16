@@ -19,6 +19,7 @@ namespace OWSO_Sync_Service
         {
             _setting = setting;
             lastupdateStorage = new LastSyncUpdateStorage();
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Ssl3 | SecurityProtocolType.Tls | SecurityProtocolType.Tls11 | SecurityProtocolType.Tls12;
             initialHttpClient();
         }
 
