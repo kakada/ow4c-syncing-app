@@ -78,7 +78,7 @@ namespace OWSO_Sync_Service
                 _setting.query,
                 _setting.accessToken,
                 _setting.sentryDSN,
-                type,
+                type + "(" + Environment.Version.ToString() + ")",
                 obj.GetType().Name,
                 message);
         }

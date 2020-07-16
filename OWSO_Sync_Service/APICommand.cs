@@ -41,23 +41,19 @@ namespace OWSO_Sync_Service
             try
             {
                 String healthApi = String.Format(_setting.healthStatusAPI, status == STATUS.SUCCESS ? "success" : "failed", _setting.siteCode);
-                Logger.getInstance().log(this, "Sending health status api: " + healthApi);
                 HttpStatusCode statusCode = await SendAPI(healthApi, "");
-                Logger.getInstance().log(this, "Health Status: " + statusCode);
 
                 if (status == STATUS.SUCCESS && statusCode == HttpStatusCode.OK)
                 {
                     if(!content.Equals(""))
                     {
                         String dbSyncApi = String.Format(_setting.databaseSyncAPI, _setting.siteCode);
-                        Logger.getInstance().log(this, "Sending database sync api: " + dbSyncApi);
                         statusCode = await SendAPI(dbSyncApi, content);
 
                         if (statusCode == HttpStatusCode.OK)
                         {
                             Logger.getInstance().log(this, "Store current time: " + newTimestamp);
                             lastupdateStorage.storeLastUpdateSync(newTimestamp);
-                            Logger.getInstance().log(this, "Database sync success");
                         }
                         else
                         {
@@ -81,7 +77,7 @@ namespace OWSO_Sync_Service
         {
             HttpResponseMessage response = await client.PutAsync(_setting.baseUrl + api, new StringContent(content, Encoding.UTF8, "application/json"));
             string result = response.Content.ReadAsStringAsync().Result;
-            Logger.getInstance().log(this, "request: " + api + "\nresponse: " + result);
+            Logger.getInstance().log(this, "\nHttp Request: " + api + "\nHttpResponse: " + result);
             return response.StatusCode;
         }
     }

@@ -1,13 +1,15 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Data.SqlClient;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace OWSO_Sync_Service
 {
     class Database
     {
-        private const String RETURN_JSON_QUERY = " FOR JSON PATH, Include_Null_Values;";
+        private const String RETURN_JSON_QUERY = " FOR XML PATH('tickets'), ROOT('ticket-container'), ELEMENTS XSINIL";
         private readonly Setting setting;
 
         public Database(Setting setting)
@@ -72,7 +74,22 @@ namespace OWSO_Sync_Service
                         {
                             while (reader.Read())
                             {
-                                json.Append(String.Format("{{\"tickets\":{0}}}" ,reader.GetValue(0).ToString()));
+                                String xmlContent = reader.GetValue(0).ToString();
+                                XmlDocument doc = new XmlDocument();
+                                Logger.getInstance().log(this, "XmlContent: " + xmlContent);
+                                doc.LoadXml(xmlContent);
+                                String jsonString = JsonConvert.SerializeXmlNode(doc);
+                                if(jsonString != null && !jsonString.Equals(""))
+                                {
+                                    int startIndex = jsonString.IndexOf("\"tickets\"");
+                                    jsonString = jsonString.Substring(startIndex, jsonString.Length - startIndex - 2);
+                                    jsonString = jsonString.Replace("{\"@xsi:nil\":\"true\"}", "\"null\"");
+                                    Logger.getInstance().log(this, "jsonString: " + jsonString);
+                                    json.Append("{" + jsonString + "}");
+                                } else
+                                {
+                                    json.Append("");
+                                }
                             }
                         }
                         else
