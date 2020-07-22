@@ -68,29 +68,17 @@ namespace OWSO_Sync_Service
 
                     Logger.getInstance().log(this, "Query: " + query);
                     SqlCommand command = new SqlCommand(query + RETURN_JSON_QUERY, conn);
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (XmlReader reader = command.ExecuteXmlReader())
                     {
-                        if (reader.HasRows)
+                        XmlDocument doc = new XmlDocument();
+                        doc.Load(reader);
+                        String jsonString = JsonConvert.SerializeXmlNode(doc);
+                        int startIndex = jsonString.IndexOf("\"tickets\"");
+                        if (jsonString != null && !jsonString.Equals("") && startIndex != -1)
                         {
-                            while (reader.Read())
-                            {
-                                String xmlContent = reader.GetValue(0).ToString();
-                                XmlDocument doc = new XmlDocument();
-                                Logger.getInstance().log(this, "XmlContent: " + xmlContent);
-                                doc.LoadXml(xmlContent);
-                                String jsonString = JsonConvert.SerializeXmlNode(doc);
-                                if(jsonString != null && !jsonString.Equals(""))
-                                {
-                                    int startIndex = jsonString.IndexOf("\"tickets\"");
-                                    jsonString = jsonString.Substring(startIndex, jsonString.Length - startIndex - 2);
-                                    jsonString = jsonString.Replace("{\"@xsi:nil\":\"true\"}", "\"null\"");
-                                    Logger.getInstance().log(this, "jsonString: " + jsonString);
-                                    json.Append("{" + jsonString + "}");
-                                } else
-                                {
-                                    json.Append("");
-                                }
-                            }
+                            jsonString = jsonString.Substring(startIndex, jsonString.Length - startIndex - 2);
+                            jsonString = jsonString.Replace("{\"@xsi:nil\":\"true\"}", "\"null\"");                            
+                            json.Append("{" + jsonString + "}");
                         }
                         else
                         {
@@ -108,8 +96,8 @@ namespace OWSO_Sync_Service
                 return new Tuple<STATUS, String>(STATUS.FAILED, e.Message);
             }
 
-
-            return new Tuple<STATUS, String>(STATUS.SUCCESS, Regex.Replace(json.ToString(), "\"[\\s\\t]+|[\\s\\t]+\"", "\""));
+            Logger.getInstance().log(this, "read json success");
+            return new Tuple<STATUS, String>(STATUS.SUCCESS, json.ToString());
         }
     }
 }

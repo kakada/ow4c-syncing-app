@@ -33,7 +33,7 @@ namespace OWSO_Sync_Service
 
         public void SubmitData(STATUS status, String content, int newTimestamp)
         {
-            Logger.getInstance().log(this, "submit data: " + content);
+            Logger.getInstance().log(this, "submit data");
             RunAsync(status, content, newTimestamp).GetAwaiter().GetResult();
         }
 
