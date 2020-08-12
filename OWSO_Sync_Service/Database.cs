@@ -1,13 +1,15 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Data.SqlClient;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace OWSO_Sync_Service
 {
     class Database
     {
-        private const String RETURN_JSON_QUERY = " FOR JSON PATH, Include_Null_Values;";
+        private const String RETURN_JSON_QUERY = " FOR XML PATH('tickets'), ROOT('ticket-container'), ELEMENTS XSINIL";
         private readonly Setting setting;
 
         public Database(Setting setting)
@@ -66,14 +68,17 @@ namespace OWSO_Sync_Service
 
                     Logger.getInstance().log(this, "Query: " + query);
                     SqlCommand command = new SqlCommand(query + RETURN_JSON_QUERY, conn);
-                    using (SqlDataReader reader = command.ExecuteReader())
+                    using (XmlReader reader = command.ExecuteXmlReader())
                     {
-                        if (reader.HasRows)
+                        XmlDocument doc = new XmlDocument();
+                        doc.Load(reader);
+                        String jsonString = JsonConvert.SerializeXmlNode(doc);
+                        int startIndex = jsonString.IndexOf("\"tickets\"");
+                        if (jsonString != null && !jsonString.Equals("") && startIndex != -1)
                         {
-                            while (reader.Read())
-                            {
-                                json.Append(String.Format("{{\"tickets\":{0}}}" ,reader.GetValue(0).ToString()));
-                            }
+                            jsonString = jsonString.Substring(startIndex, jsonString.Length - startIndex - 2);
+                            jsonString = jsonString.Replace("{\"@xsi:nil\":\"true\"}", "\"null\"");                            
+                            json.Append("{" + jsonString + "}");
                         }
                         else
                         {
@@ -91,8 +96,8 @@ namespace OWSO_Sync_Service
                 return new Tuple<STATUS, String>(STATUS.FAILED, e.Message);
             }
 
-
-            return new Tuple<STATUS, String>(STATUS.SUCCESS, Regex.Replace(json.ToString(), "\"[\\s\\t]+|[\\s\\t]+\"", "\""));
+            Logger.getInstance().log(this, "read json success");
+            return new Tuple<STATUS, String>(STATUS.SUCCESS, json.ToString());
         }
     }
 }
