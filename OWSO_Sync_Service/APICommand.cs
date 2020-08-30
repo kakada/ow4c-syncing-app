@@ -1,4 +1,5 @@
-﻿using Sentry;
+﻿using Newtonsoft.Json.Linq;
+using Sentry;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -42,14 +43,18 @@ namespace OWSO_Sync_Service
             try
             {
                 String healthApi = String.Format(_setting.healthStatusAPI, status == STATUS.SUCCESS ? "success" : "failed", _setting.siteCode);
-                HttpStatusCode statusCode = await SendAPI(healthApi, "");
+                HttpResponseMessage response = await SendAPI(healthApi, "", "post");
+                HttpStatusCode statusCode = response.StatusCode;
 
                 if (status == STATUS.SUCCESS && statusCode == HttpStatusCode.OK)
                 {
-                    if(!content.Equals(""))
+                    JObject jsonResponse = JObject.Parse(response.Content.ReadAsStringAsync().Result);
+                    String syncId = jsonResponse.GetValue("id").ToString();
+                    if (!content.Equals(""))
                     {
-                        String dbSyncApi = String.Format(_setting.databaseSyncAPI, _setting.siteCode);
-                        statusCode = await SendAPI(dbSyncApi, content);
+                        String dbSyncApi = String.Format(_setting.databaseSyncAPI, syncId);
+                        response = await SendAPI(dbSyncApi, content, "put");
+                        statusCode = response.StatusCode;
 
                         if (statusCode == HttpStatusCode.OK)
                         {
@@ -74,12 +79,19 @@ namespace OWSO_Sync_Service
             }
         }
 
-        async Task<HttpStatusCode> SendAPI(String api, String content)
+        async Task<HttpResponseMessage> SendAPI(String api, String content, String method)
         {
-            HttpResponseMessage response = await client.PutAsync(_setting.baseUrl + api, new StringContent(content, Encoding.UTF8, "application/json"));
+            HttpResponseMessage response;
+            if(method.Equals("post", StringComparison.OrdinalIgnoreCase)) {
+                response = await client.PostAsync(_setting.baseUrl + api, new StringContent(content, Encoding.UTF8, "application/json"));
+            } else
+            {
+                response = await client.PutAsync(_setting.baseUrl + api, new StringContent(content, Encoding.UTF8, "application/json"));
+            }
+
             string result = response.Content.ReadAsStringAsync().Result;
             Logger.getInstance().log(this, "\nHttp Request: " + api + "\nHttpResponse: " + result);
-            return response.StatusCode;
+            return response;
         }
     }
 }
